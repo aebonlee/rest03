@@ -246,57 +246,114 @@ const eras = [
   },
 ]
 
-// 연혁 — 원본(chinhung about-history) 구조 재현 (GSAP 대신 CSS sticky):
-//  .key-img(풀블리드 이미지 + 대형 연대) 핀 고정 → .history-cnt(좌 sticky 요약 + 우 일자 타임라인)가
-//  위로 올라와 이미지를 덮고, 다음 시대 이미지가 다시 그 위를 덮으며 전환. 모바일은 column 스택.
+// 연혁 한 시대 — 원본(about-history) GSAP 효과를 rAF 스크롤 진행도로 재현:
+//  이미지의 자연 상태 = 풀히어로(풀폭 + 대형 연대). 핀 고정되면 좌상단으로 축소되어 그 시대의
+//  썸네일이 되고, 연대/시기설명/일자 타임라인이 드러난다. 모바일(<lg)은 정적 스택.
+const HERO_TARGET = 0.36 // 풀히어로 → 썸네일 축소 비율(좌상단 도킹)
+
+function HistoryEra({ era }) {
+  const ref = useRef(null)
+  const [p, setP] = useState(0)
+  const [desktop, setDesktop] = useState(false)
+
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const el = ref.current
+        if (!el) return
+        const isDesktop = window.innerWidth >= 1024
+        setDesktop(isDesktop)
+        if (!isDesktop) {
+          setP(0)
+          return
+        }
+        const top = el.getBoundingClientRect().top
+        const pinLine = 160 // top-40 (헤더+탭 아래)
+        const dist = window.innerHeight * 0.8 // 축소가 일어나는 스크롤 길이
+        setP(clamp((pinLine - top) / dist, 0, 1))
+      })
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  const scale = 1 + (HERO_TARGET - 1) * p // 1 → 0.36
+  const heroStyle = desktop
+    ? { transform: `scale(${scale})`, transformOrigin: 'top left' }
+    : undefined
+  const yearOp = desktop ? clamp(1 - p * 1.5, 0, 1) : 1
+  const reveal = desktop ? clamp((p - 0.5) / 0.5, 0, 1) : 1
+
+  return (
+    <section ref={ref} className="relative lg:min-h-[210vh]">
+      <div className="px-4 md:px-10 lg:px-20">
+        {/* 히어로 이미지 — 데스크탑에서 sticky 핀 + 좌상단으로 축소 도킹 */}
+        <div className="lg:pointer-events-none lg:sticky lg:top-40 lg:z-30 lg:h-[calc(100vh-12rem)]">
+          <div
+            style={heroStyle}
+            className="relative h-[56vh] w-full overflow-hidden rounded-2xl bg-neutral-900 will-change-transform sm:h-[64vh] lg:h-full"
+          >
+            <Placeholder label={era.label} ratio="auto" className="h-full" dark />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/10" />
+            <p
+              style={{ opacity: yearOp }}
+              className="absolute left-[6%] top-1/2 -translate-y-1/2 whitespace-nowrap text-5xl font-semibold leading-none text-white drop-shadow md:text-7xl lg:text-[7.5rem]"
+            >
+              {era.range}
+            </p>
+          </div>
+        </div>
+
+        {/* 상세 — 데스크탑에서 히어로 위로 겹쳐, 좌상단 썸네일 옆/아래로 배치 */}
+        <div className="relative z-20 pt-10 lg:-mt-[calc(100vh-12rem)] lg:pt-0">
+          <div className="lg:flex lg:gap-[6.88rem]">
+            {/* 좌측 요약 — 데스크탑에서 도킹된 썸네일(좌상단 36%) 아래로 */}
+            <div
+              style={{ opacity: reveal }}
+              className="lg:sticky lg:top-44 lg:h-fit lg:w-[36%] lg:shrink-0 lg:pt-[calc((100vh-12rem)*0.36+2.5rem)]"
+            >
+              <p className="text-3xl font-semibold leading-none text-neutral-900 lg:text-5xl">
+                {era.range}
+              </p>
+              <p className="mt-4 whitespace-pre-line text-lg font-medium leading-8 text-neutral-600 lg:text-xl">
+                {era.summary}
+              </p>
+            </div>
+
+            {/* 우측 일자별 타임라인 */}
+            <ul
+              style={{ opacity: reveal }}
+              className="mt-10 flex flex-1 flex-col gap-12 lg:mt-0 lg:pt-2"
+            >
+              {era.items.map((it) => (
+                <li key={it.date + it.event}>
+                  <p className="text-2xl font-bold text-neutral-900 lg:text-4xl">{it.date}</p>
+                  <p className="mt-2.5 whitespace-pre-line text-lg font-medium leading-8 text-zinc-600 lg:text-2xl">
+                    {it.event}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function History() {
   return (
     <div className="mx-auto max-w-container">
       {eras.map((era) => (
-        <section key={era.range} className="relative">
-          {/* .key-img — 풀블리드 시대 이미지 + 대형 연대 (데스크탑에서 핀 고정) */}
-          <div className="px-4 md:px-10 lg:h-[130vh] lg:px-20">
-            <div className="relative h-[56vh] overflow-hidden rounded-2xl bg-neutral-900 sm:h-[66vh] lg:sticky lg:top-40 lg:h-[calc(100vh-12rem)]">
-              <Placeholder label={era.label} ratio="auto" className="h-full" dark />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
-              <p className="absolute left-6 top-[40%] -translate-y-1/2 text-5xl font-semibold leading-none text-white drop-shadow md:text-7xl lg:left-[12%] lg:top-1/2 lg:text-[7.5rem]">
-                {era.range}
-              </p>
-            </div>
-          </div>
-
-          {/* .history-cnt — 상세: 데스크탑에서 이미지 위로 올라와 덮음 */}
-          <div className="relative bg-white pb-16 pt-12 lg:-mt-[30vh] lg:rounded-t-[2.5rem] lg:pb-32 lg:pt-24 lg:shadow-[0_-40px_80px_-24px_rgba(0,0,0,0.12)]">
-            <div className="flex flex-col gap-10 px-4 md:px-10 lg:flex-row lg:gap-[6.88rem] lg:px-20">
-              {/* .history-year — 좌측 요약(연대 + 설명 + 이미지), 데스크탑 sticky */}
-              <div className="lg:sticky lg:top-44 lg:h-fit lg:w-[35rem] lg:shrink-0">
-                <p className="text-4xl font-semibold leading-none text-neutral-900 lg:text-[4.75rem]">
-                  {era.range}
-                </p>
-                <p className="mt-4 whitespace-pre-line text-lg font-medium leading-8 text-neutral-600 lg:mt-6 lg:text-2xl lg:leading-9">
-                  {era.summary}
-                </p>
-                <div className="mt-8 overflow-hidden rounded-2xl">
-                  <Placeholder label={era.label} ratio="16/9" />
-                </div>
-              </div>
-
-              {/* .cnt — 우측 일자별 타임라인 (날짜 + 사건) */}
-              <ul className="flex flex-1 flex-col gap-12 lg:pt-3">
-                {era.items.map((it, i) => (
-                  <li key={it.date + it.event}>
-                    <Reveal delay={(i % 3) * 60}>
-                      <p className="text-2xl font-bold text-neutral-900 lg:text-4xl">{it.date}</p>
-                      <p className="mt-2.5 whitespace-pre-line text-lg font-medium leading-8 text-zinc-600 lg:text-2xl">
-                        {it.event}
-                      </p>
-                    </Reveal>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
+        <HistoryEra key={era.range} era={era} />
       ))}
     </div>
   )
