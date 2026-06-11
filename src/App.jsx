@@ -22,7 +22,7 @@ export default function App() {
       <ScrollToTop />
       <Header />
       {/* 헤더가 fixed 이므로 메인 외 페이지는 헤더 높이만큼 상단 여백 */}
-      <main className={isHome ? '' : 'pt-20'}>
+      <main className={isHome ? '' : 'pt-24'}>
         <Routes>
           <Route path="/" element={<Home />} />
 

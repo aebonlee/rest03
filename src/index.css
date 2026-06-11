@@ -23,7 +23,7 @@
 
   /* 섹션 공통 좌우 여백 */
   .section-x {
-    @apply px-4 md:px-10 lg:px-24 xl:px-40;
+    @apply px-4 md:px-10 lg:px-24 xl:px-60;
   }
 }
 

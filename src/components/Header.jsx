@@ -44,7 +44,7 @@ export default function Header() {
       >
         <div
           className={[
-            'mx-auto flex h-20 max-w-container items-center justify-between px-4 md:px-10 lg:px-20',
+            'relative mx-auto flex h-24 max-w-container items-center justify-between px-4 md:px-10 lg:px-20',
             transparent ? 'border-b border-white/20' : 'border-b border-neutral-200',
           ].join(' ')}
         >
@@ -59,8 +59,8 @@ export default function Header() {
             {company.name}
           </Link>
 
-          {/* 데스크탑 대메뉴 — 하위 메뉴 컬럼과 동일한 고정 폭(w-44)으로 수직 정렬 */}
-          <ul className="hidden items-stretch lg:flex">
+          {/* 데스크탑 대메뉴 — 컨테이너 중앙(left-1/2)부터 시작, 항목 w-44 (원본 실측) */}
+          <ul className="absolute left-1/2 top-0 hidden h-full items-stretch lg:flex">
             {nav.map((item) => (
               <li
                 key={item.label}
@@ -71,7 +71,7 @@ export default function Header() {
                   to={item.to}
                   className={({ isActive }) =>
                     [
-                      'block w-full py-7 text-center text-lg font-semibold transition-colors',
+                      'block w-full py-8 text-center text-xl font-semibold transition-colors',
                       transparent
                         ? 'text-white hover:text-white/70'
                         : isActive
@@ -108,7 +108,8 @@ export default function Header() {
               : 'max-h-0 opacity-0',
           ].join(' ')}
         >
-          <div className="mx-auto flex max-w-container justify-end px-20">
+          <div className="mx-auto max-w-container px-20">
+            <div className="ml-[50%] flex">
             {nav.map((item) => (
               <ul
                 key={item.label}
@@ -133,6 +134,7 @@ export default function Header() {
                 ))}
               </ul>
             ))}
+            </div>
           </div>
         </div>
       </nav>

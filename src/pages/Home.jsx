@@ -6,125 +6,110 @@ import {
   heroQuickLinks,
   mainCards,
   businessCards,
-  ongoingProjects,
   notices,
 } from '../data/site'
 
 // ============================================================
-// 메인 페이지
-//  Hero → MainCards → AboutBand → OurBusiness → Ongoing
+// 메인 페이지 (원본 사이트 실측값 기반 자체 구현)
+//  Hero(스크롤 축소 + 카드 콜라주) → AboutBand → OurBusiness(캐러셀, 하단 겹침)
 //  → SustainabilityBand → MoreToDiscover → IRBand
 // ============================================================
 
-// ---------- 1. 히어로 슬라이더 ----------
+const clamp = (v, min, max) => Math.min(Math.max(v, min), max)
+
+// ---------- 1. 히어로 — 스크롤 시 KV 축소 + 카드 콜라주 등장 ----------
 function Hero() {
+  const wrapRef = useRef(null)
+  const [progress, setProgress] = useState(0) // 0(최상단) ~ 1(연출 종료)
   const [idx, setIdx] = useState(0)
   const [paused, setPaused] = useState(false)
 
+  // 스크롤 진행률 (rAF 스로틀)
   useEffect(() => {
-    if (paused) return undefined
-    // 슬라이드가 바뀔 때마다 5초 타이머 리셋 → 진행률 바와 정확히 동기화
+    let raf = 0
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const el = wrapRef.current
+        if (!el) return
+        const total = el.offsetHeight - window.innerHeight
+        const y = clamp(-el.getBoundingClientRect().top, 0, total)
+        setProgress(total > 0 ? y / total : 0)
+      })
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  // 자동 슬라이드 — 축소 연출 중에는 정지
+  const shrunk = progress > 0.1
+  useEffect(() => {
+    if (paused || shrunk) return undefined
     const t = setTimeout(() => setIdx((i) => (i + 1) % heroSlides.length), 5000)
     return () => clearTimeout(t)
-  }, [paused, idx])
+  }, [paused, idx, shrunk])
 
   const go = (dir) => setIdx((i) => (i + dir + heroSlides.length) % heroSlides.length)
 
+  // 보간 값: KV 100%→46% 폭, 모서리 0→20px, UI는 초반에 페이드아웃, 카드는 중후반 등장
+  const kvW = 100 - progress * 54
+  const kvH = 100 - progress * 42
+  const radius = progress * 20
+  const chrome = clamp(1 - progress * 2.5, 0, 1)
+  const cardsIn = clamp((progress - 0.3) / 0.55, 0, 1)
+
   return (
-    <section
-      className="relative h-screen min-h-[560px] w-full overflow-hidden bg-neutral-900"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      {heroSlides.map((s, i) => (
-        <div
-          key={s.label}
-          className={[
-            'absolute inset-0 transition-opacity duration-1000',
-            i === idx ? 'opacity-100' : 'pointer-events-none opacity-0',
-          ].join(' ')}
-        >
-          {/* 켄번즈 효과 — 표시되는 동안 천천히 줌인 */}
+    <section ref={wrapRef} className="relative h-[230vh] bg-white">
+      <div className="sticky top-0 h-screen overflow-hidden">
+        {/* KV — 화면 중앙으로 축소 */}
+        <div className="flex h-full w-full items-center justify-center">
           <div
-            className={[
-              'h-full w-full transition-transform duration-[7000ms] ease-out',
-              i === idx ? 'scale-110' : 'scale-100',
-            ].join(' ')}
+            className="relative overflow-hidden bg-neutral-900"
+            style={{ width: `${kvW}%`, height: `${kvH}%`, borderRadius: `${radius}px` }}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
           >
-            <Placeholder label={s.label} ratio="auto" className="h-full" dark />
-          </div>
-          {/* 살짝 어두운 오버레이로 텍스트 가독성 확보 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
-          {/* 카피 — 슬라이드 전환 시 아래에서 떠오르며 등장 */}
-          <div className="absolute inset-0 flex items-end">
-            <p
-              className={[
-                'whitespace-pre-line px-[5%] pb-36 text-5xl font-medium leading-tight text-white drop-shadow md:text-7xl lg:text-8xl',
-                i === idx ? 'translate-y-0 opacity-100 delay-300' : 'translate-y-10 opacity-0',
-                'transition-all duration-1000',
-              ].join(' ')}
+            {/* 슬라이드 트랙 — 가로 슬라이드 전환 */}
+            <div
+              className="flex h-full transition-transform duration-700 ease-out"
+              style={{
+                width: `${heroSlides.length * 100}%`,
+                transform: `translateX(-${idx * (100 / heroSlides.length)}%)`,
+              }}
             >
-              {s.copy}
-            </p>
-          </div>
-        </div>
-      ))}
+              {heroSlides.map((s, i) => (
+                <div
+                  key={s.label}
+                  className="relative h-full"
+                  style={{ width: `${100 / heroSlides.length}%` }}
+                >
+                  <Placeholder label={s.label} ratio="auto" className="h-full" dark />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/15" />
+                  <div className="absolute inset-0 flex items-end">
+                    <p
+                      className={[
+                        'whitespace-pre-line px-[5%] pb-44 text-5xl font-medium leading-tight text-white drop-shadow md:text-7xl lg:text-8xl',
+                        i === idx
+                          ? 'translate-y-0 opacity-100 delay-300'
+                          : 'translate-y-10 opacity-0',
+                        'transition-all duration-1000',
+                      ].join(' ')}
+                    >
+                      {s.copy}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-      {/* 좌하단: 슬라이드 컨트롤 (이전/카운터/다음) */}
-      <div className="absolute bottom-10 left-[5%] z-10 flex items-center gap-4 text-white">
-        <button
-          type="button"
-          aria-label="이전 슬라이드"
-          onClick={() => go(-1)}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 transition hover:bg-white/20"
-        >
-          ‹
-        </button>
-        <p className="text-sm font-semibold tracking-widest">
-          {String(idx + 1).padStart(2, '0')}
-          <span className="mx-1.5 text-white/50">/</span>
-          <span className="text-white/50">{String(heroSlides.length).padStart(2, '0')}</span>
-        </p>
-        <button
-          type="button"
-          aria-label="다음 슬라이드"
-          onClick={() => go(1)}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 transition hover:bg-white/20"
-        >
-          ›
-        </button>
-      </div>
-
-      {/* 우하단: 퀵링크 */}
-      <div className="absolute bottom-10 right-[5%] z-10 hidden gap-3 md:flex">
-        {heroQuickLinks.map((q) => (
-          <a
-            key={q.label}
-            href={q.href}
-            className={[
-              'flex items-center gap-3 rounded-full px-6 py-3.5 text-white transition',
-              q.variant === 'brand'
-                ? 'bg-brand hover:brightness-150'
-                : 'bg-stone-500/90 hover:brightness-110',
-            ].join(' ')}
-          >
-            {q.label} <span>→</span>
-          </a>
-        ))}
-      </div>
-
-      {/* 중앙하단: 진행률 바 인디케이터 + 스크롤 안내 */}
-      <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-3">
-        <div className="flex gap-2">
-          {heroSlides.map((s, i) => (
-            <button
-              key={s.label}
-              type="button"
-              aria-label={`슬라이드 ${i + 1}`}
-              onClick={() => setIdx(i)}
-              className="h-1 w-12 overflow-hidden rounded-full bg-white/30"
-            >
-              {i === idx && (
+            {/* 슬라이더 UI — 축소 시작 시 페이드아웃 */}
+            <div style={{ opacity: chrome }} className={chrome === 0 ? 'pointer-events-none' : ''}>
+              {/* 와이드 진행률 바 — 폭 90%, 하단 100px */}
+              <div className="absolute bottom-[6.25rem] left-1/2 z-10 h-[2px] w-[90%] -translate-x-1/2 overflow-hidden bg-white/[0.32]">
                 <span
                   key={`${idx}-${paused}`}
                   className="block h-full bg-white"
@@ -133,72 +118,120 @@ function Hero() {
                     width: paused ? '100%' : undefined,
                   }}
                 />
-              )}
-            </button>
-          ))}
+              </div>
+
+              {/* 좌하단: 퀵링크 (원본 위치 — left 5%, 두 번째는 +250px) */}
+              <a
+                href={heroQuickLinks[0].href}
+                className="absolute bottom-8 left-[5%] z-10 hidden rounded-full bg-brand py-3.5 pl-6 pr-14 text-white transition hover:brightness-150 md:block"
+              >
+                {heroQuickLinks[0].label}
+                <span className="absolute right-6 top-1/2 -translate-y-1/2">→</span>
+              </a>
+              <a
+                href={heroQuickLinks[1].href}
+                className="absolute bottom-8 left-[calc(5%+250px)] z-10 hidden rounded-full bg-stone-500 py-3.5 pl-6 pr-14 text-white transition hover:brightness-110 md:block"
+              >
+                {heroQuickLinks[1].label}
+                <span className="absolute right-6 top-1/2 -translate-y-1/2">→</span>
+              </a>
+
+              {/* 우하단: 이전/다음 (36px 원형) */}
+              <div className="absolute bottom-10 right-[5%] z-10 flex gap-3">
+                <button
+                  type="button"
+                  aria-label="이전 슬라이드"
+                  onClick={() => go(-1)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/60 text-white transition hover:bg-white/20"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  aria-label="다음 슬라이드"
+                  onClick={() => go(1)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/60 text-white transition hover:bg-white/20"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <span className="animate-bounce text-xs font-medium tracking-widest text-white/70">
-          SCROLL ↓
-        </span>
+
+        {/* 카드 콜라주 — KV가 줄어들면 양옆에서 등장 (원본 비율: 47.5/68/68/80.4%) */}
+        <div
+          className="pointer-events-none absolute inset-0 hidden grid-cols-2 gap-[27%] px-10 py-10 lg:grid"
+          style={{ opacity: cardsIn }}
+        >
+          {/* 좌측 컬럼 — 우측 정렬, 상단부터 */}
+          <div
+            className="flex flex-col items-end gap-2 transition-transform"
+            style={{ transform: `translateX(${(cardsIn - 1) * 60}px)` }}
+          >
+            <Link
+              to={mainCards[0].to}
+              className="pointer-events-auto w-[47.5%] overflow-hidden rounded-xl shadow-lg transition hover:-translate-y-1"
+            >
+              <Placeholder label={mainCards[0].title} ratio="4/3" />
+            </Link>
+            <Link
+              to={mainCards[1].to}
+              className="pointer-events-auto w-[68%] overflow-hidden rounded-xl shadow-lg transition hover:-translate-y-1"
+            >
+              <Placeholder label={mainCards[1].title} ratio="4/3" />
+            </Link>
+          </div>
+          {/* 우측 컬럼 — 하단 정렬 */}
+          <div
+            className="flex h-full flex-col justify-end gap-2 transition-transform"
+            style={{ transform: `translateX(${(1 - cardsIn) * 60}px)` }}
+          >
+            <Link
+              to={mainCards[2].to}
+              className="pointer-events-auto w-[68%] overflow-hidden rounded-xl shadow-lg transition hover:-translate-y-1"
+            >
+              <Placeholder label={mainCards[2].title} ratio="4/3" />
+            </Link>
+            <Link
+              to={mainCards[3].to}
+              className="pointer-events-auto w-[80.4%] overflow-hidden rounded-xl shadow-lg transition hover:-translate-y-1"
+            >
+              <Placeholder label={mainCards[3].title} ratio="4/3" />
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   )
 }
 
-// ---------- 2. 메인 카드 4장 ----------
-function MainCards() {
-  return (
-    <section className="section-x mx-auto -mt-16 max-w-container md:-mt-20">
-      <ul className="relative z-10 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
-        {mainCards.map((c) => (
-          <li key={c.key}>
-            <Link
-              to={c.to}
-              className="group block overflow-hidden rounded-xl bg-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="overflow-hidden">
-                <Placeholder
-                  label={c.title}
-                  ratio="4/3"
-                  className="transition duration-500 group-hover:scale-105"
-                />
-              </div>
-              <div className="p-4 md:p-5">
-                <p className="mb-1 font-bold text-neutral-900 md:text-lg">{c.title}</p>
-                <p className="hidden text-sm text-neutral-500 md:block">{c.desc}</p>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
-}
-
-// ---------- 3. 회사소개 밴드 ----------
+// ---------- 2. 회사소개 밴드 (py-40, 알약 버튼 py-5 pl-5 pr-14) ----------
 function AboutBand() {
   const links = [
     { label: 'CEO 인사말', to: '/about/greetings' },
     { label: '비전/가치', to: '/about/vision' },
     { label: '연혁', to: '/about/history' },
-    { label: '브랜드소개', to: '/about/brand' },
+    { label: '브랜드 소개', to: '/about/brand' },
   ]
   return (
-    <section className="py-24 text-center md:py-32">
-      <p className="mx-auto mb-12 max-w-3xl px-6 text-2xl font-bold leading-snug text-neutral-800 md:text-3xl">
+    <section className="py-24 text-center lg:py-40">
+      <p className="mx-auto mt-6 max-w-3xl px-6 text-2xl font-bold leading-snug text-neutral-800 md:text-3xl">
         1959년 창립 이후, 대한민국 건설 산업과 함께 성장해 왔습니다.
         <br className="hidden md:block" />
         오랜 현장에서 쌓아온 기술력으로 더 나은 내일의 기반을 만듭니다.
       </p>
-      <ul className="flex flex-wrap justify-center gap-4 px-4">
+      <ul className="mt-16 flex flex-wrap justify-center gap-4 px-4 font-bold">
         {links.map((l) => (
           <li key={l.to}>
             <Link
               to={l.to}
-              className="relative inline-flex items-center gap-3 rounded-full bg-neutral-100 py-4 pl-6 pr-12 font-bold transition hover:bg-neutral-200"
+              className="relative inline-block rounded-full bg-neutral-100 py-5 pl-5 pr-14 transition hover:bg-neutral-200"
             >
               {l.label}
-              <span className="absolute right-5 text-neutral-500">→</span>
+              <span className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-500">
+                →
+              </span>
             </Link>
           </li>
         ))}
@@ -207,149 +240,68 @@ function AboutBand() {
   )
 }
 
-// ---------- 4. Our Business (데스크탑: 호버 확장 패널 / 모바일: 가로 스크롤) ----------
+// ---------- 3. Our Business — 캐러셀 + 하단 섹션 겹침(-mb-48) ----------
 function OurBusiness() {
-  const [active, setActive] = useState(0)
+  const trackRef = useRef(null)
+  const next = () => trackRef.current?.scrollBy({ left: 460, behavior: 'smooth' })
 
   return (
-    <section className="pb-24 md:pb-32">
-      <div className="section-x mx-auto max-w-container">
-        <h2 className="mb-12 text-4xl font-bold leading-tight text-brand md:text-6xl">
+    <section className="relative z-10 -mb-48 py-24 lg:py-40">
+      {/* 헤딩 — 원본: pl-60, text-7xl, violet-950 */}
+      <div className="mb-12 px-4 md:px-10 lg:pl-60">
+        <p className="text-4xl font-bold leading-tight text-brand md:text-6xl lg:text-7xl">
           Our Business
           <br />
           Shaping the Future
-        </h2>
+        </p>
       </div>
 
-      {/* 데스크탑: 호버 시 가로로 확장되는 패널 */}
-      <div className="section-x mx-auto hidden max-w-container gap-3 lg:flex">
-        {businessCards.map((b, i) => (
-          <Link
-            key={b.key}
-            to={b.to}
-            onMouseEnter={() => setActive(i)}
-            className={[
-              'group relative h-[480px] overflow-hidden rounded-2xl transition-all duration-500',
-              active === i ? 'flex-[2.4]' : 'flex-1',
-            ].join(' ')}
-          >
-            <Placeholder label={b.title} ratio="auto" className="h-full" dark />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
-              <p className="mb-3 text-2xl font-bold">{b.title}</p>
-              <p
-                className={[
-                  'max-w-sm text-sm leading-6 transition-all duration-500',
-                  active === i ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
-                ].join(' ')}
-              >
-                {b.desc}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
+      <div className="relative">
+        {/* 카드 트랙 — 카드 내부 p-11, 제목 text-4xl mb-8 */}
+        <div
+          ref={trackRef}
+          className="flex snap-x gap-5 overflow-x-auto px-4 pb-4 md:px-10 lg:pl-60"
+        >
+          {businessCards.map((b) => (
+            <Link
+              key={b.key}
+              to={b.to}
+              className="group relative h-[420px] w-72 shrink-0 snap-start overflow-hidden rounded-xl md:h-[560px] md:w-[420px]"
+            >
+              <Placeholder label={b.title} ratio="auto" className="h-full" dark />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-7 text-white md:p-11">
+                <p className="mb-4 text-2xl font-bold md:mb-8 md:text-4xl">{b.title}</p>
+                <p className="text-base leading-7 md:text-xl md:leading-8">{b.desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
 
-      {/* 모바일/태블릿: 가로 스크롤 카드 */}
-      <div className="flex gap-5 overflow-x-auto px-4 pb-4 md:px-10 lg:hidden">
-        {businessCards.map((b) => (
-          <Link
-            key={b.key}
-            to={b.to}
-            className="relative h-[360px] w-64 shrink-0 overflow-hidden rounded-xl"
-          >
-            <Placeholder label={b.title} ratio="auto" className="h-full" dark />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-              <p className="mb-3 text-xl font-bold">{b.title}</p>
-              <p className="text-sm leading-6 text-white/90">{b.desc}</p>
-            </div>
-          </Link>
-        ))}
+        {/* 다음 버튼 — 원본 64px 원형, 우측 */}
+        <button
+          type="button"
+          aria-label="다음 카드"
+          onClick={next}
+          className="absolute right-6 top-1/2 z-10 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full bg-white text-2xl text-brand shadow-lg transition hover:scale-105 lg:flex"
+        >
+          ›
+        </button>
       </div>
     </section>
   )
 }
 
-// ---------- 5. 시공 중인 프로젝트 캐러셀 ----------
-function OngoingProjects() {
-  const trackRef = useRef(null)
-  const scrollBy = (dir) => {
-    trackRef.current?.scrollBy({ left: dir * 340, behavior: 'smooth' })
-  }
-
-  return (
-    <section className="bg-neutral-50 py-24 md:py-32">
-      <div className="section-x mx-auto mb-10 flex max-w-container items-end justify-between">
-        <div>
-          <p className="mb-3 text-sm font-semibold tracking-widest text-neutral-400">
-            ON-GOING PROJECTS
-          </p>
-          <h2 className="text-3xl font-bold text-neutral-900 md:text-5xl">
-            시공 중인 프로젝트
-          </h2>
-        </div>
-        <div className="hidden gap-2 md:flex">
-          <button
-            type="button"
-            aria-label="이전"
-            onClick={() => scrollBy(-1)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 text-neutral-600 transition hover:border-brand hover:text-brand"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            aria-label="다음"
-            onClick={() => scrollBy(1)}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 text-neutral-600 transition hover:border-brand hover:text-brand"
-          >
-            ›
-          </button>
-        </div>
-      </div>
-
-      <div
-        ref={trackRef}
-        className="flex snap-x gap-6 overflow-x-auto px-4 pb-4 md:px-10 lg:px-24 xl:px-40"
-      >
-        {ongoingProjects.map((p) => (
-          <Link
-            key={p.title}
-            to={p.to}
-            className="group w-80 shrink-0 snap-start overflow-hidden rounded-xl bg-white shadow-sm transition hover:shadow-lg"
-          >
-            <div className="overflow-hidden">
-              <Placeholder
-                label="PROJECT"
-                ratio="16/10"
-                className="transition duration-500 group-hover:scale-105"
-              />
-            </div>
-            <div className="p-6">
-              <p className="mb-1 text-xs font-semibold tracking-widest text-brand">
-                {p.region}
-              </p>
-              <p className="mb-4 text-lg font-bold leading-snug text-neutral-900">
-                {p.title}
-              </p>
-              <p className="text-sm font-semibold text-neutral-500 transition group-hover:text-brand">
-                페이지 보기 →
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-// ---------- 6. 지속가능경영 밴드 ----------
+// ---------- 4. 지속가능경영 밴드 — 풀폭 BG, OurBusiness 카드가 상단에 겹침 ----------
 function SustainabilityBand() {
   return (
-    <section className="relative h-[480px] w-full overflow-hidden md:h-[600px]">
-      <Placeholder label="SUSTAINABILITY BG" ratio="auto" className="h-full" dark />
-      <div className="absolute inset-0 flex flex-col justify-center bg-black/35 px-4 md:px-10 lg:px-40">
+    <section className="relative w-full overflow-hidden">
+      <div className="absolute inset-0">
+        <Placeholder label="SUSTAINABILITY BG" ratio="auto" className="h-full" dark />
+        <div className="absolute inset-0 bg-black/35" />
+      </div>
+      {/* 콘텐츠 — 겹침 보정을 위해 상단 패딩 크게 (원본 섹션 높이 ~978px) */}
+      <div className="relative flex min-h-[640px] flex-col justify-center px-4 pb-24 pt-72 md:px-10 lg:min-h-[860px] lg:px-60">
         <p className="mb-4 text-sm font-semibold tracking-widest text-white/80">
           SUSTAINABILITY
         </p>
@@ -365,9 +317,10 @@ function SustainabilityBand() {
         <div>
           <Link
             to="/sustainability/ethical"
-            className="inline-flex items-center gap-3 rounded-full bg-white/90 px-6 py-3.5 font-bold text-brand transition hover:bg-white"
+            className="relative inline-block rounded-full bg-white/90 py-5 pl-5 pr-14 font-bold text-brand transition hover:bg-white"
           >
-            전체보기 <span>→</span>
+            전체보기
+            <span className="absolute right-5 top-1/2 -translate-y-1/2">→</span>
           </Link>
         </div>
       </div>
@@ -375,30 +328,37 @@ function SustainabilityBand() {
   )
 }
 
-// ---------- 7. More to Discover (공지) ----------
+// ---------- 5. More to Discover — py-40 px-60, text-7xl, border-b-2 ----------
 function MoreToDiscover() {
   return (
-    <section className="py-24 md:py-32">
-      <div className="section-x mx-auto flex max-w-container flex-col">
-        <div className="mb-12 flex flex-col items-start justify-between gap-6 border-b-2 border-neutral-400 pb-10 md:flex-row md:items-center">
-          <p className="text-4xl font-bold text-brand md:text-6xl">More to Discover</p>
+    <section className="px-4 py-24 md:px-10 lg:px-60 lg:py-40">
+      <div className="mx-auto flex max-w-container flex-col">
+        <div className="mb-12 flex flex-col items-start justify-between gap-6 border-b-2 border-neutral-500 pb-12 font-bold md:flex-row md:items-center">
+          <p className="text-4xl text-brand md:text-6xl lg:text-7xl">More to Discover</p>
           <Link
             to="/support/notice"
-            className="relative inline-flex items-center gap-3 rounded-full bg-neutral-100 py-4 pl-6 pr-12 font-bold transition hover:bg-neutral-200"
+            className="relative inline-block rounded-full bg-neutral-100 py-5 pl-5 pr-14 transition hover:bg-neutral-200"
           >
-            전체보기 <span className="absolute right-5 text-neutral-500">→</span>
+            전체보기
+            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-500">
+              →
+            </span>
           </Link>
         </div>
 
         <ul className="flex flex-col divide-y divide-neutral-200">
-          {notices.slice(0, 4).map((n) => (
+          {notices.slice(0, 5).map((n) => (
             <li key={n.id}>
               <Link
                 to="/support/notice"
                 className="flex flex-col justify-between gap-1 py-5 transition hover:text-brand md:flex-row md:items-center"
               >
-                <span className="text-lg font-semibold md:text-xl">{n.title}</span>
-                <span className="text-sm text-neutral-500 md:text-base">{n.date}</span>
+                <span className="truncate text-xl font-semibold md:text-2xl md:leading-8">
+                  {n.title}
+                </span>
+                <span className="shrink-0 text-sm text-neutral-500 md:text-base">
+                  {n.date}
+                </span>
               </Link>
             </li>
           ))}
@@ -408,27 +368,34 @@ function MoreToDiscover() {
   )
 }
 
-// ---------- 8. Investor Relations 밴드 ----------
+// ---------- 6. Investor Relations 밴드 — 풀폭 BG, 높이 620px ----------
 function IRBand() {
   return (
-    <section className="bg-brand-deep py-24 text-white md:py-32">
-      <div className="section-x mx-auto flex max-w-container flex-col items-start justify-between gap-10 md:flex-row md:items-center">
+    <section className="relative w-full overflow-hidden">
+      <div className="absolute inset-0">
+        <Placeholder label="IR BG" ratio="auto" className="h-full" dark />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+      <div className="relative flex min-h-[480px] flex-col justify-center px-4 md:px-10 lg:min-h-[620px] lg:px-60">
+        <p className="mb-4 text-sm font-semibold tracking-widest text-white/70">
+          INVESTOR RELATIONS
+        </p>
+        <h2 className="mb-6 text-3xl font-bold leading-tight text-white md:text-5xl">
+          투자정보
+        </h2>
+        <p className="mb-8 max-w-xl leading-7 text-white/85">
+          투명한 경영과 꾸준한 혁신으로 기업 경쟁력을 키우고, 안정적인 성장 구조를
+          만들어갑니다.
+        </p>
         <div>
-          <p className="mb-4 text-sm font-semibold tracking-widest text-white/60">
-            INVESTOR RELATIONS
-          </p>
-          <h2 className="mb-6 text-3xl font-bold leading-tight md:text-5xl">투자정보</h2>
-          <p className="max-w-xl leading-7 text-white/80">
-            투명한 경영과 꾸준한 혁신으로 기업 경쟁력을 키우고,
-            안정적인 성장 구조를 만들어갑니다.
-          </p>
+          <Link
+            to="/investment/governance"
+            className="relative inline-block rounded-full bg-white/90 py-5 pl-5 pr-14 font-bold text-brand transition hover:bg-white"
+          >
+            전체보기
+            <span className="absolute right-5 top-1/2 -translate-y-1/2">→</span>
+          </Link>
         </div>
-        <Link
-          to="/investment/governance"
-          className="inline-flex shrink-0 items-center gap-3 rounded-full bg-white px-7 py-4 font-bold text-brand transition hover:bg-neutral-100"
-        >
-          전체보기 <span>→</span>
-        </Link>
       </div>
     </section>
   )
@@ -438,10 +405,8 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <MainCards />
       <AboutBand />
       <OurBusiness />
-      <OngoingProjects />
       <SustainabilityBand />
       <MoreToDiscover />
       <IRBand />

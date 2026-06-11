@@ -36,6 +36,8 @@ export const company = {
     { name: '효성굿스프링스', url: 'https://www.hsgoodsprings.com' },
     { name: '효성티엔씨', url: 'https://www.hyosungtnc.com' },
     { name: '효성화학', url: 'https://www.hyosungchemical.com' },
+    { name: '효성티엔에스', url: 'https://korea.hyosunginnovue.com' },
+    { name: '효성 ITX', url: 'https://www.hyosungitx.com' },
   ],
   footerLinks: [
     { label: '제보센터', to: '/report' },
@@ -73,7 +75,7 @@ export const nav = [
       { label: 'CEO 인사말', to: '/about/greetings' },
       { label: '비전/가치', to: '/about/vision' },
       { label: '연혁', to: '/about/history' },
-      { label: '브랜드소개', to: '/about/brand' },
+      { label: '브랜드 소개', to: '/about/brand' },
     ],
   },
   {
