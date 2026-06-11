@@ -59,8 +59,8 @@ export default function Header() {
             {company.name}
           </Link>
 
-          {/* 데스크탑 대메뉴 — 컨테이너 중앙(left-1/2)부터 시작, 항목 w-44 (원본 실측) */}
-          <ul className="absolute left-1/2 top-0 hidden h-full items-stretch lg:flex">
+          {/* 데스크탑 대메뉴 — 컨테이너 중앙 정렬, 항목 w-44 (원본: 1440px 이하 숨김) */}
+          <ul className="absolute left-1/2 top-0 hidden h-full -translate-x-1/2 items-stretch min-[1441px]:flex">
             {nav.map((item) => (
               <li
                 key={item.label}
@@ -90,7 +90,7 @@ export default function Header() {
           <button
             type="button"
             aria-label="메뉴 열기"
-            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden"
+            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 min-[1441px]:hidden"
             onClick={() => setMobileOpen(true)}
           >
             <span className={transparent ? 'h-0.5 w-6 bg-white' : 'h-0.5 w-6 bg-neutral-800'} />
@@ -102,14 +102,14 @@ export default function Header() {
         {/* 데스크탑 풀 메가메뉴 — 전체 컬럼이 한 번에 펼쳐짐 */}
         <div
           className={[
-            'hidden overflow-hidden bg-white transition-all duration-300 lg:block',
+            'hidden overflow-hidden bg-white transition-all duration-300 min-[1441px]:block',
             megaOpen
               ? 'max-h-96 border-b border-neutral-200 opacity-100'
               : 'max-h-0 opacity-0',
           ].join(' ')}
         >
           <div className="mx-auto max-w-container px-20">
-            <div className="ml-[50%] flex">
+            <div className="flex justify-center">
             {nav.map((item) => (
               <ul
                 key={item.label}
@@ -141,7 +141,7 @@ export default function Header() {
 
       {/* 모바일 패널 — 아코디언 */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50 min-[1441px]:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <div className="absolute right-0 top-0 h-full w-4/5 max-w-sm overflow-y-auto bg-white p-6 shadow-xl">
             <div className="mb-6 flex items-center justify-between">
