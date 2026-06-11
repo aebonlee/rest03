@@ -31,7 +31,10 @@ src/
     ├── Business.jsx      # 사업소개 (카테고리 탭 + 실적 그리드 + 페이지네이션)
     ├── Sustainability.jsx# 지속가능경영 (품질경영 선언·방침·인증)
     ├── About.jsx         # 회사소개 (CEO인사말·연혁 등)
-    └── SimplePage.jsx    # 투자정보/고객센터/인재채용 등 단순 페이지
+    ├── Investment.jsx    # 투자정보 (지배구조·재무·공시·공고·IR)
+    ├── Support.jsx       # 고객센터 (공지 게시판·협력업체·문의 폼)
+    ├── Recruit.jsx       # 인재채용 (인재상·채용공고)
+    └── SimplePage.jsx    # 제보센터/법적고지 등 단순 페이지
 ```
 
 ## 페이지 / 라우트
@@ -42,7 +45,9 @@ src/
 | 회사소개 | `/about/greetings` `/about/vision` `/about/history` `/about/brand` |
 | 사업소개 | `/business/housing` `…/building` `…/civil` `…/plant` `…/global` |
 | 지속가능경영 | `/sustainability/ethical` `…/safety` `…/quality` `…/csr` |
-| 투자정보·고객센터·인재채용 | `/investment` `/support` `/recruit` |
+| 투자정보           | `/investment/governance` `…/financial` `…/disclosure` `…/announcement` `…/report` |
+| 고객센터           | `/support/notice` `…/partner` `…/contact`                          |
+| 인재채용           | `/recruit/people` `…/jobs`                                         |
 
 ## 개발
 

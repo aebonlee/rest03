@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
@@ -8,14 +8,21 @@ import Home from './pages/Home'
 import Business from './pages/Business'
 import Sustainability from './pages/Sustainability'
 import About from './pages/About'
+import Investment from './pages/Investment'
+import Support from './pages/Support'
+import Recruit from './pages/Recruit'
 import SimplePage from './pages/SimplePage'
 
 export default function App() {
+  const { pathname } = useLocation()
+  const isHome = pathname === '/'
+
   return (
     <div className="min-w-[320px]">
       <ScrollToTop />
       <Header />
-      <main>
+      {/* 헤더가 fixed 이므로 메인 외 페이지는 헤더 높이만큼 상단 여백 */}
+      <main className={isHome ? '' : 'pt-20'}>
         <Routes>
           <Route path="/" element={<Home />} />
 
@@ -34,10 +41,19 @@ export default function App() {
           />
           <Route path="/sustainability/:tab" element={<Sustainability />} />
 
+          {/* 투자정보 */}
+          <Route path="/investment" element={<Navigate to="/investment/governance" replace />} />
+          <Route path="/investment/:tab" element={<Investment />} />
+
+          {/* 고객센터 */}
+          <Route path="/support" element={<Navigate to="/support/notice" replace />} />
+          <Route path="/support/:tab" element={<Support />} />
+
+          {/* 인재채용 */}
+          <Route path="/recruit" element={<Navigate to="/recruit/people" replace />} />
+          <Route path="/recruit/:tab" element={<Recruit />} />
+
           {/* 기타 단순 페이지 */}
-          <Route path="/investment" element={<SimplePage title="투자정보" />} />
-          <Route path="/support" element={<SimplePage title="고객센터" />} />
-          <Route path="/recruit" element={<SimplePage title="인재채용" />} />
           <Route path="/report" element={<SimplePage title="제보센터" />} />
           <Route path="/legal" element={<SimplePage title="법적고지" />} />
           <Route path="/privacy" element={<SimplePage title="개인정보처리방침" />} />

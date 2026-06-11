@@ -53,6 +53,69 @@ function Greetings() {
   )
 }
 
+// 비전/가치 — 핵심가치 카드 (템플릿용 자체 카피)
+function Vision() {
+  const values = [
+    { en: 'Trust', ko: '신뢰', desc: '약속한 품질과 일정을 지켜 고객의 믿음에 보답합니다.' },
+    { en: 'Technology', ko: '기술', desc: '현장에서 검증된 기술로 안전하고 견고하게 짓습니다.' },
+    { en: 'Together', ko: '상생', desc: '고객·협력사·지역사회와 함께 성장합니다.' },
+  ]
+  return (
+    <div>
+      <div className="mb-16 rounded-2xl bg-brand px-8 py-14 text-center text-white md:py-20">
+        <p className="mb-4 text-sm font-semibold tracking-widest text-white/60">VISION</p>
+        <p className="text-3xl font-bold leading-snug md:text-4xl">
+          공간의 가치를 높여
+          <br />
+          삶의 기반을 만드는 건설 파트너
+        </p>
+      </div>
+      <ul className="grid gap-6 md:grid-cols-3">
+        {values.map((v) => (
+          <li key={v.en} className="rounded-2xl border border-neutral-200 p-8 transition hover:border-brand">
+            <p className="mb-1 text-sm font-semibold tracking-widest text-brand">{v.en}</p>
+            <p className="mb-4 text-2xl font-bold text-neutral-900">{v.ko}</p>
+            <p className="leading-7 text-neutral-600">{v.desc}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// 브랜드소개 (템플릿용 자체 카피)
+function Brand() {
+  return (
+    <div className="flex flex-col gap-12 md:flex-row md:gap-16">
+      <div className="w-full md:w-1/2">
+        <Placeholder label="BRAND VISUAL" ratio="4/3" rounded />
+      </div>
+      <div className="flex-1">
+        <p className="mb-6 text-3xl font-bold leading-snug text-brand md:text-4xl">
+          일상에 품격을 더하는
+          <br />
+          주거 브랜드
+        </p>
+        <div className="space-y-5 text-lg font-medium leading-8 text-neutral-700">
+          <p>
+            우리의 주거 브랜드는 거주자의 하루를 세심하게 관찰하는 데서 출발합니다. 동선과
+            채광, 수납과 커뮤니티까지 — 생활의 디테일을 설계에 담습니다.
+          </p>
+          <p>
+            입주 이후의 삶까지 책임지는 사후 관리 체계로, 시간이 지날수록 가치가 높아지는
+            집을 만들어갑니다.
+          </p>
+        </div>
+        <div className="mt-10 grid grid-cols-3 gap-4">
+          <Placeholder label="BI 01" ratio="1/1" rounded />
+          <Placeholder label="BI 02" ratio="1/1" rounded />
+          <Placeholder label="BI 03" ratio="1/1" rounded />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function History() {
   return (
     <div className="flex flex-col gap-10">
@@ -86,14 +149,8 @@ export default function About() {
         </p>
         {tab === 'greetings' && <Greetings />}
         {tab === 'history' && <History />}
-        {(tab === 'vision' || tab === 'brand') && (
-          <>
-            <p className="mb-10 text-lg font-medium leading-8 text-neutral-700">
-              {meta.title} 콘텐츠가 들어갈 영역입니다. 실제 운영 시 내용으로 교체하세요.
-            </p>
-            <Placeholder label={`${meta.title} CONTENT`} ratio="21/9" rounded />
-          </>
-        )}
+        {tab === 'vision' && <Vision />}
+        {tab === 'brand' && <Brand />}
       </div>
     </SubPageLayout>
   )
