@@ -8,36 +8,21 @@
 export const useDemoImages = true
 
 export const company = {
-  name: 'CHINHUNG',
-  nameKo: '진흥기업',
-  fullName: 'CHINHUNG INTERNATIONAL INC.',
-  copyright: '© 2026 CHINHUNG INTERNATIONAL INC. All rights reserved.',
+  name: 'DreamIT Biz',
+  nameKo: '드림아이티비즈',
+  fullName: 'DreamIT Biz',
+  website: 'www.dreamitbiz.com',
+  websiteUrl: 'https://www.dreamitbiz.com',
+  email: 'info@dreamitbiz.com', // TODO: 실제 대표 이메일로 교체
+  copyright: '© 2026 DreamIT Biz. All rights reserved.',
   intro: [
-    '우리는 건물을 짓는 일을 넘어, 사람이 머무는 공간과 그 주변 환경까지 함께 고민합니다.',
-    '도시와 자연이 어우러지는 지속 가능한 터전을 만들기 위해 기술과 책임, 그리고 배려를 더해 나갑니다.',
+    '우리는 사람과 기술을 잇는 디지털 경험을 만듭니다.',
+    '교육과 개발, 그리고 AI를 아우르는 솔루션으로 더 나은 내일의 기반을 만들어갑니다.',
   ],
-  offices: [
-    {
-      label: '서울지사',
-      address: '서울특별시 용산구 후암로 27 (후암동)',
-      tel: '02-772-1200',
-      fax: '02-754-2972',
-    },
-    {
-      label: '본사',
-      address: '인천광역시 연수구 컨벤시아대로 69 807호',
-      tel: '032-432-0658',
-      fax: '032-432-0659',
-    },
-  ],
-  familySites: [
-    { name: '효성그룹', url: 'https://www.hyosung.com' },
-    { name: '효성중공업', url: 'https://www.hyosungheavyindustries.com' },
-    { name: '효성굿스프링스', url: 'https://www.hsgoodsprings.com' },
-    { name: '효성티엔씨', url: 'https://www.hyosungtnc.com' },
-    { name: '효성화학', url: 'https://www.hyosungchemical.com' },
-    { name: '효성티엔에스', url: 'https://korea.hyosunginnovue.com' },
-    { name: '효성 ITX', url: 'https://www.hyosungitx.com' },
+  // 푸터 연락처 — 실제 주소·연락처는 운영값으로 교체하세요.
+  contacts: [
+    { label: 'Web', value: 'www.dreamitbiz.com', href: 'https://www.dreamitbiz.com' },
+    { label: 'Email', value: 'info@dreamitbiz.com', href: 'mailto:info@dreamitbiz.com' },
   ],
   footerLinks: [
     { label: '제보센터', to: '/report' },

@@ -92,7 +92,7 @@ function Hero() {
                   <div className="absolute inset-0 flex items-end">
                     <p
                       className={[
-                        'whitespace-pre-line px-[5%] pb-44 text-5xl font-medium leading-tight text-white drop-shadow md:text-7xl lg:text-8xl',
+                        'whitespace-pre-line px-[5%] pb-32 text-4xl font-medium leading-tight text-white drop-shadow sm:text-5xl md:pb-44 md:text-7xl lg:text-8xl',
                         i === idx
                           ? 'translate-y-0 opacity-100 delay-300'
                           : 'translate-y-10 opacity-0',

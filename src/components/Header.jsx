@@ -86,6 +86,15 @@ export default function Header() {
             ))}
           </ul>
 
+          {/* 우측 영역 — 데스크탑: 로고와 동일 폭 투명 스페이서(중앙 메뉴 좌우 여백 대칭용) / 모바일: 햄버거 */}
+          {/* 데스크탑: 로고 텍스트를 그대로 복제한 투명 스페이서 → 로고가 바뀌어도 폭 자동 일치 */}
+          <span
+            aria-hidden="true"
+            className="invisible hidden select-none text-2xl font-extrabold tracking-tight min-[1441px]:block"
+          >
+            {company.name}
+          </span>
+
           {/* 햄버거 (모바일) */}
           <button
             type="button"
