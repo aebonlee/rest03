@@ -58,8 +58,18 @@ export default function Footer() {
             </a>
           </div>
 
+          {/* 사업자 정보 — 구분자(|) 포함, 모바일에서 자연 줄바꿈 */}
+          <ul className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t-2 border-neutral-800 pt-6 text-xs leading-5 text-neutral-500 md:text-[0.8125rem]">
+            {company.businessInfo.map((info, i) => (
+              <li key={info} className="flex items-center gap-x-3">
+                {i > 0 && <span aria-hidden="true" className="text-neutral-700">|</span>}
+                {info}
+              </li>
+            ))}
+          </ul>
+
           {/* 하단 바 — 정책 링크 + 카피라이트 */}
-          <div className="flex flex-col gap-4 border-t-2 border-neutral-800 pt-6 text-sm md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4 text-sm md:flex-row md:items-center md:justify-between">
             <ul className="flex flex-wrap gap-x-6 gap-y-2">
               {company.footerLinks.map((l) => (
                 <li key={l.to}>

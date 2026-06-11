@@ -13,16 +13,21 @@ export const company = {
   fullName: 'DreamIT Biz',
   website: 'www.dreamitbiz.com',
   websiteUrl: 'https://www.dreamitbiz.com',
-  email: 'info@dreamitbiz.com', // TODO: 실제 대표 이메일로 교체
-  copyright: '© 2026 DreamIT Biz. All rights reserved.',
+  copyright: '© 2025 드림아이티비즈(DreamIT Biz). All rights reserved.',
   intro: [
     '우리는 사람과 기술을 잇는 디지털 경험을 만듭니다.',
     '교육과 개발, 그리고 AI를 아우르는 솔루션으로 더 나은 내일의 기반을 만들어갑니다.',
   ],
-  // 푸터 연락처 — 실제 주소·연락처는 운영값으로 교체하세요.
+  // 푸터 사업자 정보
+  businessInfo: [
+    '대표: 이애본(Ph.D)',
+    '한신대학교 AI·SW대학 겸임교수',
+    '사업자등록번호: 601-45-20154',
+    '통신판매신고번호: 제2024-수원팔달-0584호',
+    '출판사 신고번호: 제2026-000026호',
+  ],
   contacts: [
     { label: 'Web', value: 'www.dreamitbiz.com', href: 'https://www.dreamitbiz.com' },
-    { label: 'Email', value: 'info@dreamitbiz.com', href: 'mailto:info@dreamitbiz.com' },
   ],
   footerLinks: [
     { label: '제보센터', to: '/report' },
