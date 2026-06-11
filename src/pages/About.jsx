@@ -246,47 +246,52 @@ const eras = [
   },
 ]
 
+// 연혁 — 원본(chinhung) stack-pin 연출:
+//  데스크탑에서 각 시대 패널이 화면에 핀 고정되고, 다음 시대가 위로 올라와 이전을 덮으며 전환.
+//  모바일에서는 겹침 없이 카드로 자연 스택.
 function History() {
   return (
-    <div className="mx-auto max-w-container px-4 pb-24 md:px-10 lg:px-20 lg:pb-40">
-      {eras.map((era, ei) => (
+    <div className="mx-auto max-w-container px-4 pb-24 md:px-10 lg:px-20 lg:pb-32">
+      {eras.map((era) => (
         <section
           key={era.range}
-          className={[
-            'flex flex-col gap-8 py-12 lg:flex-row lg:items-start lg:gap-[6.88rem] lg:py-16',
-            ei > 0 ? 'border-t border-neutral-200' : '',
-          ].join(' ')}
+          className="relative mb-8 overflow-hidden rounded-2xl bg-neutral-900 lg:sticky lg:top-40 lg:mb-0 lg:h-[calc(100vh-11rem)]"
         >
-          {/* 좌: 시대 요약 — 이미지 + 연대 + 시기 설명 (원본 구조, 데스크탑 sticky) */}
-          <div className="lg:sticky lg:top-24 lg:w-[35rem] lg:shrink-0">
-            <div className="relative h-60 overflow-hidden rounded-2xl bg-neutral-900 sm:h-80 lg:h-[26rem]">
-              <Placeholder label={era.label} ratio="auto" className="h-full" dark />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/10" />
-              <p className="absolute bottom-6 left-6 text-4xl font-semibold leading-none text-white drop-shadow md:text-5xl lg:text-6xl">
-                {era.range}
-              </p>
-            </div>
-            <p className="mt-6 text-lg font-medium leading-8 text-neutral-600">
-              {era.summary}
-            </p>
+          {/* 배경 이미지 — 풀블리드 */}
+          <div className="absolute inset-0">
+            <Placeholder label={era.label} ratio="auto" className="h-full" dark />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/20" />
           </div>
 
-          {/* 우: 일자별 연혁 리스트 — 일자 한 줄 + 사건 한 줄 (원본 형식) */}
-          <ul className="flex flex-1 flex-col">
-            {era.items.map((it, i) => (
-              <li
-                key={it.date + it.event}
-                className="border-b border-neutral-200 py-6 first:pt-0"
-              >
-                <Reveal delay={(i % 4) * 60}>
-                  <p className="text-lg font-bold text-neutral-900">{it.date}</p>
-                  <p className="mt-1 whitespace-pre-line text-base font-medium leading-8 text-neutral-700 lg:text-lg">
+          {/* 콘텐츠 */}
+          <div className="relative flex min-h-[26rem] flex-col justify-between gap-8 p-7 lg:h-full lg:flex-row lg:items-end lg:p-14">
+            {/* 좌: 연대 + 시기 설명 */}
+            <div className="lg:max-w-sm lg:pb-4">
+              <p className="text-5xl font-semibold leading-none text-white drop-shadow md:text-7xl lg:text-[6.5rem]">
+                {era.range}
+              </p>
+              <p className="mt-5 text-base font-medium leading-7 text-white/85 lg:text-lg">
+                {era.summary}
+              </p>
+            </div>
+
+            {/* 우: 일자별 연혁 리스트 */}
+            <ul className="w-full rounded-xl bg-white/10 p-6 backdrop-blur-sm lg:max-h-[72%] lg:max-w-xl lg:overflow-y-auto lg:p-8">
+              {era.items.map((it) => (
+                <li
+                  key={it.date + it.event}
+                  className="flex flex-col gap-1 border-b border-white/15 py-4 first:pt-0 last:border-0 last:pb-0 md:flex-row md:gap-6"
+                >
+                  <span className="shrink-0 font-bold text-white md:w-24 lg:text-lg">
+                    {it.date}
+                  </span>
+                  <span className="font-medium leading-7 text-white/85 lg:text-lg">
                     {it.event}
-                  </p>
-                </Reveal>
-              </li>
-            ))}
-          </ul>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       ))}
     </div>
