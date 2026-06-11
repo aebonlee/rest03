@@ -200,43 +200,48 @@ const eras = [
   {
     range: '2018 ~ 2025',
     label: 'HISTORY 01',
+    summary: '디지털 전환과 함께 새로운 성장 동력을 만들어가는 시기',
     items: [
-      { year: '2024', events: ['스마트 건설기술 도입 확대', '홈페이지 리뉴얼 오픈'] },
-      { year: '2022', events: ['안전경영 체계 고도화'] },
-      { year: '2021', events: ['친환경 건축 인증 단지 준공'] },
-      { year: '2019', events: ['스마트 안전관리 시스템 현장 도입'] },
-      { year: '2018', events: ['주거 브랜드 리뉴얼'] },
+      { date: '2024. 12', event: '신규 수주 목표 조기 달성' },
+      { date: '2024. 03', event: '스마트 건설기술 도입 확대' },
+      { date: '2022. 06', event: '안전경영 체계 고도화' },
+      { date: '2021. 04', event: '친환경 건축 인증 단지 준공' },
+      { date: '2019. 05', event: '스마트 안전관리 시스템 현장 도입' },
+      { date: '2018. 03', event: '주거 브랜드 리뉴얼' },
     ],
   },
   {
     range: '2000 ~ 2017',
     label: 'HISTORY 02',
+    summary: '사업 다각화와 품질 체계 고도화로 기반을 다진 시기',
     items: [
-      { year: '2015', events: ['해외 인프라 사업 진출'] },
-      { year: '2010', events: ['충남도청신도시 지하차도 건설 수주'] },
-      { year: '2008', events: ['수도권 도시정비 사업 수주'] },
-      { year: '2006', events: ['대형 플랜트 프로젝트 준공'] },
-      { year: '2002', events: ['품질경영 전사 확대'] },
+      { date: '2015. 07', event: '해외 인프라 사업 진출' },
+      { date: '2010. 07', event: '충남도청신도시 지하차도 건설 수주' },
+      { date: '2008. 10', event: '수도권 도시정비 사업 수주' },
+      { date: '2006. 05', event: '대형 플랜트 프로젝트 준공' },
+      { date: '2002. 11', event: '품질경영 전사 확대' },
     ],
   },
   {
     range: '1980 ~ 1999',
     label: 'HISTORY 03',
+    summary: '사업 영역 확장과 인증 체계 구축의 시기',
     items: [
-      { year: '1998', events: ['ISO 9001 품질경영시스템 최초 인증'] },
-      { year: '1990', events: ['수도권 대형 주택단지 시공'] },
-      { year: '1988', events: ['대규모 국가 행사 기반시설 공사 참여'] },
-      { year: '1984', events: ['토목 부문 사업 확장'] },
+      { date: '1998. 07', event: 'ISO 9001 품질경영시스템 최초 인증' },
+      { date: '1990. 04', event: '수도권 대형 주택단지 시공' },
+      { date: '1988. 09', event: '대규모 국가 행사 기반시설 공사 참여' },
+      { date: '1984. 06', event: '토목 부문 사업 확장' },
     ],
   },
   {
     range: '1959 ~ 1979',
     label: 'HISTORY 04',
+    summary: '창립과 함께 성장의 기반을 마련한 시기',
     items: [
-      { year: '1975', events: ['국가 기반시설 공사 참여'] },
-      { year: '1968', events: ['본사 사옥 신축'] },
-      { year: '1963', events: ['첫 대형 토목 공사 준공'] },
-      { year: '1959', events: ['회사 창립'] },
+      { date: '1975. 02', event: '국가 기반시설 공사 참여' },
+      { date: '1968. 10', event: '본사 사옥 신축' },
+      { date: '1963. 05', event: '첫 대형 토목 공사 준공' },
+      { date: '1959. 09', event: '회사 창립' },
     ],
   },
 ]
@@ -248,40 +253,40 @@ function History() {
         <section
           key={era.range}
           className={[
-            'flex flex-col-reverse gap-8 py-12 lg:flex-row lg:items-start lg:gap-16 lg:py-16',
+            'flex flex-col gap-8 py-12 lg:flex-row lg:items-start lg:gap-[6.88rem] lg:py-16',
             ei > 0 ? 'border-t border-neutral-200' : '',
           ].join(' ')}
         >
-          {/* 좌: 연도별 연혁 컬럼 — 스크롤되며 하나씩 등장 */}
-          <ul className="flex flex-1 flex-col gap-5">
-            {era.items.map((h, i) => (
-              <Reveal key={h.year} delay={i * 70}>
-                <li className="rounded-xl border border-neutral-100 bg-white p-6 shadow-sm transition hover:shadow-md lg:p-8">
-                  <div className="flex flex-col gap-2 md:flex-row md:gap-8">
-                    <p className="text-2xl font-bold text-brand md:w-24 md:shrink-0 lg:text-3xl">
-                      {h.year}
-                    </p>
-                    <ul className="flex flex-1 flex-col gap-1.5 text-base font-medium text-neutral-700 lg:text-lg">
-                      {h.events.map((e) => (
-                        <li key={e}>· {e}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </li>
-              </Reveal>
-            ))}
-          </ul>
-
-          {/* 우: 시대 비주얼 — 데스크탑에서 스크롤을 따라 핀 고정 */}
-          <div className="lg:sticky lg:top-24 lg:w-[42%] lg:shrink-0">
-            <div className="relative h-60 overflow-hidden rounded-2xl bg-neutral-900 sm:h-80 lg:h-[34rem]">
+          {/* 좌: 시대 요약 — 이미지 + 연대 + 시기 설명 (원본 구조, 데스크탑 sticky) */}
+          <div className="lg:sticky lg:top-24 lg:w-[35rem] lg:shrink-0">
+            <div className="relative h-60 overflow-hidden rounded-2xl bg-neutral-900 sm:h-80 lg:h-[26rem]">
               <Placeholder label={era.label} ratio="auto" className="h-full" dark />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/10" />
-              <p className="absolute bottom-6 left-6 text-4xl font-semibold leading-none text-white drop-shadow md:text-6xl lg:text-7xl">
+              <p className="absolute bottom-6 left-6 text-4xl font-semibold leading-none text-white drop-shadow md:text-5xl lg:text-6xl">
                 {era.range}
               </p>
             </div>
+            <p className="mt-6 text-lg font-medium leading-8 text-neutral-600">
+              {era.summary}
+            </p>
           </div>
+
+          {/* 우: 일자별 연혁 리스트 — 일자 한 줄 + 사건 한 줄 (원본 형식) */}
+          <ul className="flex flex-1 flex-col">
+            {era.items.map((it, i) => (
+              <li
+                key={it.date + it.event}
+                className="border-b border-neutral-200 py-6 first:pt-0"
+              >
+                <Reveal delay={(i % 4) * 60}>
+                  <p className="text-lg font-bold text-neutral-900">{it.date}</p>
+                  <p className="mt-1 whitespace-pre-line text-base font-medium leading-8 text-neutral-700 lg:text-lg">
+                    {it.event}
+                  </p>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
         </section>
       ))}
     </div>
