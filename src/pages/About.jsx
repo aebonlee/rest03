@@ -243,62 +243,47 @@ const eras = [
 
 function History() {
   return (
-    <div>
-      {eras.map((era, ei) => {
-        const isLast = ei === eras.length - 1
-        return (
-          <section key={era.range}>
-            {/* ① 시대 이미지 — 실측: 높이 798px(49.88rem) 고정 + 런웨이 pb 1028px(64.25rem) */}
-            <div className="relative px-4 pb-[28rem] md:px-10 lg:px-0 lg:pb-[64.25rem]">
-              <div className="sticky top-24 h-[calc(100vh-6rem)] overflow-hidden rounded-2xl bg-neutral-900 lg:h-[49.88rem]">
-                <Placeholder label={era.label} ratio="auto" className="h-full" dark />
-                <div className="absolute inset-0 bg-black/30" />
-                {/* 연대 텍스트 — 실측: 7.5rem semibold, left 18%, 세로 중앙 */}
-                <p className="absolute left-[8%] top-1/2 -translate-y-1/2 text-5xl font-semibold leading-none text-white md:text-7xl lg:left-[18%] lg:text-[7.5rem]">
-                  {era.range}
-                </p>
-              </div>
-            </div>
+    <div className="mx-auto max-w-container px-4 pb-24 md:px-10 lg:px-20 lg:pb-40">
+      {eras.map((era, ei) => (
+        <section
+          key={era.range}
+          className={[
+            'flex flex-col-reverse gap-8 py-12 lg:flex-row lg:items-start lg:gap-16 lg:py-16',
+            ei > 0 ? 'border-t border-neutral-200' : '',
+          ].join(' ')}
+        >
+          {/* 좌: 연도별 연혁 컬럼 — 스크롤되며 하나씩 등장 */}
+          <ul className="flex flex-1 flex-col gap-5">
+            {era.items.map((h, i) => (
+              <Reveal key={h.year} delay={i * 70}>
+                <li className="rounded-xl border border-neutral-100 bg-white p-6 shadow-sm transition hover:shadow-md lg:p-8">
+                  <div className="flex flex-col gap-2 md:flex-row md:gap-8">
+                    <p className="text-2xl font-bold text-brand md:w-24 md:shrink-0 lg:text-3xl">
+                      {h.year}
+                    </p>
+                    <ul className="flex flex-1 flex-col gap-1.5 text-base font-medium text-neutral-700 lg:text-lg">
+                      {h.events.map((e) => (
+                        <li key={e}>· {e}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </li>
+              </Reveal>
+            ))}
+          </ul>
 
-            {/* ② 상세 연혁 — 실측: px-60, 좌측 35rem 고정 컬럼 + gap 110px,
-                음수 하단 마진으로 다음 시대 이미지가 상세 끝을 덮으며 등장
-                (원본 -54rem, 데모 분량에 맞춰 축소 — 항목 늘리면 키우세요) */}
-            <div
-              className={[
-                'relative z-10 flex flex-col items-start gap-12 px-4 pb-40 md:px-10 lg:flex-row lg:gap-[6.88rem] lg:px-60 lg:pb-72',
-                isLast ? '' : 'lg:-mb-[16rem]',
-              ].join(' ')}
-            >
-              {/* 좌: 연도별 연혁 컬럼 (실측 폭 35rem) */}
-              <div className="flex w-full shrink-0 flex-col gap-6 lg:w-[35rem]">
-                {era.items.map((h, i) => (
-                  <Reveal key={h.year} delay={i * 80}>
-                    <div className="rounded-xl bg-white/95 p-7 shadow-lg backdrop-blur lg:p-9">
-                      <div className="flex flex-col gap-3 md:flex-row md:gap-10">
-                        <p className="text-3xl font-bold text-brand md:w-24 lg:text-4xl">
-                          {h.year}
-                        </p>
-                        <ul className="flex flex-1 flex-col gap-2 text-lg font-medium text-neutral-700">
-                          {h.events.map((e) => (
-                            <li key={e}>· {e}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
-
-              {/* 우: 시대 보조 비주얼 — 스크롤을 따라오는 sticky 이미지 */}
-              <div className="hidden w-full lg:sticky lg:top-36 lg:block lg:flex-1">
-                <Reveal delay={160}>
-                  <Placeholder label={`${era.label} DETAIL`} ratio="4/3" rounded />
-                </Reveal>
-              </div>
+          {/* 우: 시대 비주얼 — 데스크탑에서 스크롤을 따라 핀 고정 */}
+          <div className="lg:sticky lg:top-24 lg:w-[42%] lg:shrink-0">
+            <div className="relative h-60 overflow-hidden rounded-2xl bg-neutral-900 sm:h-80 lg:h-[34rem]">
+              <Placeholder label={era.label} ratio="auto" className="h-full" dark />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/10" />
+              <p className="absolute bottom-6 left-6 text-4xl font-semibold leading-none text-white drop-shadow md:text-6xl lg:text-7xl">
+                {era.range}
+              </p>
             </div>
-          </section>
-        )
-      })}
+          </div>
+        </section>
+      ))}
     </div>
   )
 }
