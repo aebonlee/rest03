@@ -59,19 +59,19 @@ export default function Header() {
             {company.name}
           </Link>
 
-          {/* 데스크탑 대메뉴 */}
+          {/* 데스크탑 대메뉴 — 하위 메뉴 컬럼과 동일한 고정 폭(w-44)으로 수직 정렬 */}
           <ul className="hidden items-stretch lg:flex">
             {nav.map((item) => (
               <li
                 key={item.label}
-                className="flex items-center"
+                className="flex w-44 items-center justify-center"
                 onMouseEnter={() => setMegaOpen(true)}
               >
                 <NavLink
                   to={item.to}
                   className={({ isActive }) =>
                     [
-                      'px-7 py-7 text-lg font-semibold transition-colors',
+                      'block w-full py-7 text-center text-lg font-semibold transition-colors',
                       transparent
                         ? 'text-white hover:text-white/70'
                         : isActive

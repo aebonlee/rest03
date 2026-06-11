@@ -23,9 +23,10 @@ function Hero() {
 
   useEffect(() => {
     if (paused) return undefined
-    const t = setInterval(() => setIdx((i) => (i + 1) % heroSlides.length), 5000)
-    return () => clearInterval(t)
-  }, [paused])
+    // 슬라이드가 바뀔 때마다 5초 타이머 리셋 → 진행률 바와 정확히 동기화
+    const t = setTimeout(() => setIdx((i) => (i + 1) % heroSlides.length), 5000)
+    return () => clearTimeout(t)
+  }, [paused, idx])
 
   const go = (dir) => setIdx((i) => (i + dir + heroSlides.length) % heroSlides.length)
 
@@ -43,15 +44,23 @@ function Hero() {
             i === idx ? 'opacity-100' : 'pointer-events-none opacity-0',
           ].join(' ')}
         >
-          <Placeholder label={s.label} ratio="auto" className="h-full" dark />
+          {/* 켄번즈 효과 — 표시되는 동안 천천히 줌인 */}
+          <div
+            className={[
+              'h-full w-full transition-transform duration-[7000ms] ease-out',
+              i === idx ? 'scale-110' : 'scale-100',
+            ].join(' ')}
+          >
+            <Placeholder label={s.label} ratio="auto" className="h-full" dark />
+          </div>
           {/* 살짝 어두운 오버레이로 텍스트 가독성 확보 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
-          {/* 카피 */}
+          {/* 카피 — 슬라이드 전환 시 아래에서 떠오르며 등장 */}
           <div className="absolute inset-0 flex items-end">
             <p
               className={[
                 'whitespace-pre-line px-[5%] pb-36 text-5xl font-medium leading-tight text-white drop-shadow md:text-7xl lg:text-8xl',
-                i === idx ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0',
+                i === idx ? 'translate-y-0 opacity-100 delay-300' : 'translate-y-10 opacity-0',
                 'transition-all duration-1000',
               ].join(' ')}
             >
@@ -104,7 +113,7 @@ function Hero() {
         ))}
       </div>
 
-      {/* 중앙하단: 인디케이터 + 스크롤 안내 */}
+      {/* 중앙하단: 진행률 바 인디케이터 + 스크롤 안내 */}
       <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-3">
         <div className="flex gap-2">
           {heroSlides.map((s, i) => (
@@ -113,11 +122,19 @@ function Hero() {
               type="button"
               aria-label={`슬라이드 ${i + 1}`}
               onClick={() => setIdx(i)}
-              className={[
-                'h-1.5 rounded-full transition-all',
-                i === idx ? 'w-8 bg-white' : 'w-2 bg-white/50',
-              ].join(' ')}
-            />
+              className="h-1 w-12 overflow-hidden rounded-full bg-white/30"
+            >
+              {i === idx && (
+                <span
+                  key={`${idx}-${paused}`}
+                  className="block h-full bg-white"
+                  style={{
+                    animation: paused ? 'none' : 'heroProgress 5s linear forwards',
+                    width: paused ? '100%' : undefined,
+                  }}
+                />
+              )}
+            </button>
           ))}
         </div>
         <span className="animate-bounce text-xs font-medium tracking-widest text-white/70">

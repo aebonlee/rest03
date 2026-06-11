@@ -27,6 +27,16 @@
   }
 }
 
+/* 히어로 인디케이터 진행률 바 */
+@keyframes heroProgress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 /* 히어로 슬라이더 페이드 */
 @keyframes heroFade {
   0%,
