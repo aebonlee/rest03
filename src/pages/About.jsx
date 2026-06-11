@@ -203,6 +203,8 @@ const eras = [
     items: [
       { year: '2024', events: ['스마트 건설기술 도입 확대', '홈페이지 리뉴얼 오픈'] },
       { year: '2022', events: ['안전경영 체계 고도화'] },
+      { year: '2021', events: ['친환경 건축 인증 단지 준공'] },
+      { year: '2019', events: ['스마트 안전관리 시스템 현장 도입'] },
       { year: '2018', events: ['주거 브랜드 리뉴얼'] },
     ],
   },
@@ -212,7 +214,9 @@ const eras = [
     items: [
       { year: '2015', events: ['해외 인프라 사업 진출'] },
       { year: '2010', events: ['충남도청신도시 지하차도 건설 수주'] },
+      { year: '2008', events: ['수도권 도시정비 사업 수주'] },
       { year: '2006', events: ['대형 플랜트 프로젝트 준공'] },
+      { year: '2002', events: ['품질경영 전사 확대'] },
     ],
   },
   {
@@ -221,6 +225,7 @@ const eras = [
     items: [
       { year: '1998', events: ['ISO 9001 품질경영시스템 최초 인증'] },
       { year: '1990', events: ['수도권 대형 주택단지 시공'] },
+      { year: '1988', events: ['대규모 국가 행사 기반시설 공사 참여'] },
       { year: '1984', events: ['토목 부문 사업 확장'] },
     ],
   },
@@ -230,6 +235,7 @@ const eras = [
     items: [
       { year: '1975', events: ['국가 기반시설 공사 참여'] },
       { year: '1968', events: ['본사 사옥 신축'] },
+      { year: '1963', events: ['첫 대형 토목 공사 준공'] },
       { year: '1959', events: ['회사 창립'] },
     ],
   },
@@ -237,40 +243,62 @@ const eras = [
 
 function History() {
   return (
-    <div className="mx-auto max-w-container px-4 md:px-10">
-      {eras.map((era) => (
-        <section key={era.range} className="relative pb-24 lg:pb-40">
-          {/* 핀 이미지 — 풀높이(100vh - 헤더 96px), rounded-2xl */}
-          <div className="sticky top-24 h-[calc(100vh-6rem)] overflow-hidden rounded-2xl bg-neutral-900">
-            <Placeholder label={era.label} ratio="auto" className="h-full" dark />
-            <div className="absolute inset-0 bg-black/30" />
-            {/* 연대 텍스트 — 원본: 7.5rem(120px) semibold, left 18%, 세로 중앙 */}
-            <p className="absolute left-[8%] top-1/2 -translate-y-1/2 text-5xl font-semibold leading-none text-white md:text-7xl lg:left-[18%] lg:text-[7.5rem]">
-              {era.range}
-            </p>
-          </div>
+    <div>
+      {eras.map((era, ei) => {
+        const isLast = ei === eras.length - 1
+        return (
+          <section key={era.range}>
+            {/* ① 시대 이미지 — 실측: 높이 798px(49.88rem) 고정 + 런웨이 pb 1028px(64.25rem) */}
+            <div className="relative px-4 pb-[28rem] md:px-10 lg:px-0 lg:pb-[64.25rem]">
+              <div className="sticky top-24 h-[calc(100vh-6rem)] overflow-hidden rounded-2xl bg-neutral-900 lg:h-[49.88rem]">
+                <Placeholder label={era.label} ratio="auto" className="h-full" dark />
+                <div className="absolute inset-0 bg-black/30" />
+                {/* 연대 텍스트 — 실측: 7.5rem semibold, left 18%, 세로 중앙 */}
+                <p className="absolute left-[8%] top-1/2 -translate-y-1/2 text-5xl font-semibold leading-none text-white md:text-7xl lg:left-[18%] lg:text-[7.5rem]">
+                  {era.range}
+                </p>
+              </div>
+            </div>
 
-          {/* 상세 연혁 — 핀 이미지 위로 스크롤되는 카드 */}
-          <div className="relative z-10 mx-auto -mt-[35vh] flex max-w-3xl flex-col gap-6 px-4 pb-24 lg:pb-40">
-            {era.items.map((h, i) => (
-              <Reveal key={h.year} delay={i * 80}>
-                <div className="rounded-xl bg-white/95 p-7 shadow-lg backdrop-blur lg:p-9">
-                  <div className="flex flex-col gap-3 md:flex-row md:gap-12">
-                    <p className="text-3xl font-bold text-brand md:w-28 lg:text-4xl">
-                      {h.year}
-                    </p>
-                    <ul className="flex flex-1 flex-col gap-2 text-lg font-medium text-neutral-700">
-                      {h.events.map((e) => (
-                        <li key={e}>· {e}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      ))}
+            {/* ② 상세 연혁 — 실측: px-60, 좌측 35rem 고정 컬럼 + gap 110px,
+                음수 하단 마진으로 다음 시대 이미지가 상세 끝을 덮으며 등장
+                (원본 -54rem, 데모 분량에 맞춰 축소 — 항목 늘리면 키우세요) */}
+            <div
+              className={[
+                'relative z-10 flex flex-col items-start gap-12 px-4 pb-40 md:px-10 lg:flex-row lg:gap-[6.88rem] lg:px-60 lg:pb-72',
+                isLast ? '' : 'lg:-mb-[16rem]',
+              ].join(' ')}
+            >
+              {/* 좌: 연도별 연혁 컬럼 (실측 폭 35rem) */}
+              <div className="flex w-full shrink-0 flex-col gap-6 lg:w-[35rem]">
+                {era.items.map((h, i) => (
+                  <Reveal key={h.year} delay={i * 80}>
+                    <div className="rounded-xl bg-white/95 p-7 shadow-lg backdrop-blur lg:p-9">
+                      <div className="flex flex-col gap-3 md:flex-row md:gap-10">
+                        <p className="text-3xl font-bold text-brand md:w-24 lg:text-4xl">
+                          {h.year}
+                        </p>
+                        <ul className="flex flex-1 flex-col gap-2 text-lg font-medium text-neutral-700">
+                          {h.events.map((e) => (
+                            <li key={e}>· {e}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+
+              {/* 우: 시대 보조 비주얼 — 스크롤을 따라오는 sticky 이미지 */}
+              <div className="hidden w-full lg:sticky lg:top-36 lg:block lg:flex-1">
+                <Reveal delay={160}>
+                  <Placeholder label={`${era.label} DETAIL`} ratio="4/3" rounded />
+                </Reveal>
+              </div>
+            </div>
+          </section>
+        )
+      })}
     </div>
   )
 }
