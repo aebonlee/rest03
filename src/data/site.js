@@ -4,6 +4,9 @@
 // ※ 모든 문구는 템플릿용 자체 카피입니다. 실제 운영 시 교체하세요.
 // ============================================================
 
+// true: 무료 데모 이미지(picsum.photos) 자동 로드 / false: 회색 플레이스홀더 박스
+export const useDemoImages = true
+
 export const company = {
   name: 'CHINHUNG',
   nameKo: '진흥기업',

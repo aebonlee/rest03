@@ -1,7 +1,23 @@
+import { useState } from 'react'
+import { useDemoImages } from '../data/site'
+
 // ============================================================
-// 이미지 플레이스홀더 — 실제 이미지 대신 라벨/비율을 표시
-// 템플릿에서 이미지가 들어갈 자리를 명확히 구분하기 위한 컴포넌트
+// 이미지 플레이스홀더
+//  - useDemoImages = false : 라벨/비율을 표시하는 회색 박스 (기본 골격 확인용)
+//  - useDemoImages = true  : 무료 데모 이미지(picsum.photos)를 자동 로드
+//    → 라벨 기반 시드라서 새로고침해도 같은 자리는 같은 이미지가 유지됨
+//  실제 운영 시에는 이 컴포넌트를 <img src="..."> 로 교체하세요.
 // ============================================================
+
+// "16/9" → [w, h] 픽셀 크기 계산
+function sizeFromRatio(ratio) {
+  if (!ratio || ratio === 'auto') return [1600, 900]
+  const [w, h] = String(ratio).split('/').map(Number)
+  if (!w || !h) return [1200, 800]
+  const width = 1200
+  return [width, Math.round((width * h) / w)]
+}
+
 export default function Placeholder({
   label = 'IMAGE',
   ratio = '16/9',
@@ -9,6 +25,37 @@ export default function Placeholder({
   rounded = false,
   dark = false,
 }) {
+  const [failed, setFailed] = useState(false)
+  const showImage = useDemoImages && !failed
+
+  if (showImage) {
+    const [w, h] = sizeFromRatio(ratio)
+    const seed = encodeURIComponent(label.replace(/\s+/g, '-').toLowerCase())
+    return (
+      <div
+        style={{ aspectRatio: ratio === 'auto' ? undefined : ratio }}
+        className={[
+          'relative w-full overflow-hidden bg-neutral-300',
+          ratio === 'auto' ? 'h-full' : '',
+          rounded ? 'rounded-xl' : '',
+          className,
+        ].join(' ')}
+      >
+        <img
+          src={`https://picsum.photos/seed/${seed}/${w}/${h}`}
+          alt={label}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* 데모 이미지 표식 (운영 시 제거) */}
+        <span className="absolute bottom-2 right-2 z-10 rounded bg-black/40 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white/80">
+          DEMO
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div
       style={{ aspectRatio: ratio }}
