@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom'
 import SubPageLayout from '../components/SubPageLayout'
 import Placeholder from '../components/Placeholder'
 import Reveal from '../components/Reveal'
+import { company } from '../data/site'
 
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max)
 
@@ -186,7 +187,7 @@ function Greetings() {
 
         {/* 서명 — 원본: 우측 정렬, 회사명 text-4xl bold */}
         <p className="mt-10 text-right font-semibold">
-          <span className="text-3xl font-bold md:text-4xl">CHINHUNG</span>
+          <span className="text-3xl font-bold md:text-4xl">{company.name}</span>
           <br />
           대표이사
         </p>
@@ -465,8 +466,8 @@ function Brand() {
 // ---------- 인사말 페이지헤드 — 중앙 인용구 오버레이 (문구는 자체 카피) ----------
 function GreetingsHead() {
   return (
-    <div className="relative">
-      <Placeholder label="PAGE HEAD — Greetings" ratio="32/9" dark />
+    <div className="relative aspect-[16/10] md:aspect-[32/9]">
+      <Placeholder label="PAGE HEAD — Greetings" ratio="auto" className="h-full" dark />
       <div className="absolute inset-0 flex flex-wrap content-center justify-center bg-black/25 px-6 text-center text-xl font-medium text-white md:text-3xl lg:px-60 lg:text-4xl">
         <p>“신뢰로 짓고, 가치로 보답하는 기업”</p>
       </div>

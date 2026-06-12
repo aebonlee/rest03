@@ -18,7 +18,9 @@ export default function SimplePage({ title }) {
         </div>
       </div>
 
-      <Placeholder label={`PAGE HEAD — ${title}`} ratio="32/9" />
+      <div className="aspect-[16/10] md:aspect-[32/9]">
+        <Placeholder label={`PAGE HEAD — ${title}`} ratio="auto" className="h-full" />
+      </div>
 
       <div className="mx-auto max-w-container px-4 py-24 text-center md:px-10 lg:px-40">
         <p className="text-xl font-medium text-neutral-600">

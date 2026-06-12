@@ -322,8 +322,8 @@ const irRows = [
 // ---------- 페이지헤드 — 중앙 메시지 오버레이 (문구는 자체 카피) ----------
 function InvestHead({ headLabel }) {
   return (
-    <div className="relative">
-      <Placeholder label={`PAGE HEAD — ${headLabel}`} ratio="32/9" dark />
+    <div className="relative aspect-[16/10] md:aspect-[32/9]">
+      <Placeholder label={`PAGE HEAD — ${headLabel}`} ratio="auto" className="h-full" dark />
     <div className="absolute inset-0 flex flex-wrap content-center justify-center bg-black/25 px-6 text-center text-xl font-medium text-white md:text-3xl lg:px-60 lg:text-4xl">
         <p>
           투명한 경영과 꾸준한 혁신으로

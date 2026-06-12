@@ -46,7 +46,11 @@ export default function SubPageLayout({ sectionTitle, tabs, headLabel, head, chi
       </div>
 
       {/* 페이지헤드 — 커스텀 헤드(스크롤 연출 등) 또는 기본 이미지 */}
-      {head || <Placeholder label={`PAGE HEAD — ${headLabel}`} ratio="32/9" />}
+      {head || (
+        <div className="aspect-[16/10] md:aspect-[32/9]">
+          <Placeholder label={`PAGE HEAD — ${headLabel}`} ratio="auto" className="h-full" />
+        </div>
+      )}
 
       {/* 본문 — 원본: py-28, border-b-2 neutral-200 */}
       <div className="border-b-2 border-neutral-200 py-16 md:py-28">{children}</div>
