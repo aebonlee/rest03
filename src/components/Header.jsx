@@ -59,8 +59,8 @@ export default function Header() {
             {company.name}
           </Link>
 
-          {/* 데스크탑 대메뉴 — 컨테이너 중앙 정렬, 항목 w-44 (원본: 1440px 이하 숨김) */}
-          <ul className="absolute left-1/2 top-0 hidden h-full -translate-x-1/2 items-stretch min-[1441px]:flex">
+          {/* 데스크탑 대메뉴 — 중앙에서 우측으로 살짝 이동(로고↔첫 메뉴 간격 확보), 항목 w-44 */}
+          <ul className="absolute left-1/2 top-0 hidden h-full translate-x-[calc(-50%+5rem)] items-stretch min-[1441px]:flex">
             {nav.map((item) => (
               <li
                 key={item.label}
@@ -118,7 +118,7 @@ export default function Header() {
           ].join(' ')}
         >
           <div className="mx-auto max-w-container px-20">
-            <div className="flex justify-center">
+            <div className="flex justify-center translate-x-[5rem]">
             {nav.map((item) => (
               <ul
                 key={item.label}
