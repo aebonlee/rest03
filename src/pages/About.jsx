@@ -246,15 +246,11 @@ const eras = [
   },
 ]
 
-// 연혁 한 시대 — 원본(about-history) GSAP 효과를 rAF 스크롤 진행도로 재현:
-//  이미지의 자연 상태 = 풀히어로(풀폭 + 대형 연대). 핀 고정되면 좌상단으로 축소되어 그 시대의
-//  썸네일이 되고, 연대/시기설명/일자 타임라인이 드러난다. 모바일(<lg)은 정적 스택.
-const HERO_TARGET = 0.36 // 풀히어로 → 썸네일 축소 비율(좌상단 도킹)
-
+// 연혁 한 시대 — 좌측 sticky 비주얼(연대 이미지 + 대형 연대, 스크롤 따라 살짝 축소) +
+//  우측 일자별 타임라인(항상 표시). 콘텐츠 가림 없이 안정적으로 모든 내역이 보인다.
 function HistoryEra({ era }) {
   const ref = useRef(null)
-  const [p, setP] = useState(0)
-  const [desktop, setDesktop] = useState(false)
+  const [scale, setScale] = useState(1)
 
   useEffect(() => {
     let raf = 0
@@ -262,17 +258,15 @@ function HistoryEra({ era }) {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
         const el = ref.current
-        if (!el) return
-        const isDesktop = window.innerWidth >= 1024
-        setDesktop(isDesktop)
-        if (!isDesktop) {
-          setP(0)
+        if (!el || window.innerWidth < 1024) {
+          setScale(1)
           return
         }
+        // 시대 비주얼이 sticky로 머무는 동안 1 → 0.9로 살짝 축소
         const top = el.getBoundingClientRect().top
-        const pinLine = 160 // top-40 (헤더+탭 아래)
-        const dist = window.innerHeight * 0.8 // 축소가 일어나는 스크롤 길이
-        setP(clamp((pinLine - top) / dist, 0, 1))
+        const dist = window.innerHeight * 0.7
+        const p = clamp((176 - top) / dist, 0, 1) // 176 = top-44
+        setScale(1 - 0.1 * p)
       })
     }
     update()
@@ -285,64 +279,45 @@ function HistoryEra({ era }) {
     }
   }, [])
 
-  const scale = 1 + (HERO_TARGET - 1) * p // 1 → 0.36
-  const heroStyle = desktop
-    ? { transform: `scale(${scale})`, transformOrigin: 'top left' }
-    : undefined
-  const yearOp = desktop ? clamp(1 - p * 1.5, 0, 1) : 1
-  const reveal = desktop ? clamp((p - 0.5) / 0.5, 0, 1) : 1
-
   return (
-    <section ref={ref} className="relative lg:min-h-[210vh]">
+    <section
+      ref={ref}
+      className="border-t border-neutral-200 py-12 first:border-t-0 first:pt-0 lg:py-20"
+    >
       <div className="px-4 md:px-10 lg:px-20">
-        {/* 히어로 이미지 — 데스크탑에서 sticky 핀 + 좌상단으로 축소 도킹 */}
-        <div className="lg:pointer-events-none lg:sticky lg:top-40 lg:z-30 lg:h-[calc(100vh-12rem)]">
-          <div
-            style={heroStyle}
-            className="relative h-[56vh] w-full overflow-hidden rounded-2xl bg-neutral-900 will-change-transform sm:h-[64vh] lg:h-full"
-          >
-            <Placeholder label={era.label} ratio="auto" className="h-full" dark />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/10" />
-            <p
-              style={{ opacity: yearOp }}
-              className="absolute left-[6%] top-1/2 -translate-y-1/2 whitespace-nowrap text-5xl font-semibold leading-none text-white drop-shadow md:text-7xl lg:text-[7.5rem]"
-            >
-              {era.range}
-            </p>
-          </div>
-        </div>
-
-        {/* 상세 — 데스크탑에서 히어로 위로 겹쳐, 좌상단 썸네일 옆/아래로 배치 */}
-        <div className="relative z-20 pt-10 lg:-mt-[calc(100vh-12rem)] lg:pt-0">
-          <div className="lg:flex lg:gap-[6.88rem]">
-            {/* 좌측 요약 — 데스크탑에서 도킹된 썸네일(좌상단 36%) 아래로 */}
+        <div className="lg:flex lg:items-start lg:gap-[6.88rem]">
+          {/* 좌측 — 시대 비주얼 + 요약 (데스크탑 sticky, 스크롤 따라 살짝 축소) */}
+          <div className="lg:sticky lg:top-44 lg:h-fit lg:w-[35%] lg:shrink-0">
             <div
-              style={{ opacity: reveal }}
-              className="lg:sticky lg:top-44 lg:h-fit lg:w-[36%] lg:shrink-0 lg:pt-[calc((100vh-12rem)*0.36+2.5rem)]"
+              style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}
+              className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-neutral-900 will-change-transform lg:aspect-[3/4]"
             >
-              <p className="text-3xl font-semibold leading-none text-neutral-900 lg:text-5xl">
+              <Placeholder label={era.label} ratio="auto" className="h-full" dark />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
+              <p className="absolute bottom-6 left-6 whitespace-nowrap text-4xl font-semibold leading-none text-white drop-shadow md:text-6xl lg:text-[3.75rem]">
                 {era.range}
               </p>
-              <p className="mt-4 whitespace-pre-line text-lg font-medium leading-8 text-neutral-600 lg:text-xl">
-                {era.summary}
-              </p>
             </div>
+            <p className="mt-6 whitespace-pre-line text-lg font-medium leading-8 text-neutral-600 lg:text-xl">
+              {era.summary}
+            </p>
+          </div>
 
-            {/* 우측 일자별 타임라인 */}
-            <ul
-              style={{ opacity: reveal }}
-              className="mt-10 flex flex-1 flex-col gap-12 lg:mt-0 lg:pt-2"
-            >
-              {era.items.map((it) => (
-                <li key={it.date + it.event}>
-                  <p className="text-2xl font-bold text-neutral-900 lg:text-4xl">{it.date}</p>
-                  <p className="mt-2.5 whitespace-pre-line text-lg font-medium leading-8 text-zinc-600 lg:text-2xl">
+          {/* 우측 — 일자별 타임라인 (항상 표시) */}
+          <ul className="mt-10 flex flex-1 flex-col gap-10 border-l-2 border-neutral-100 pl-6 lg:mt-0 lg:gap-12 lg:pl-12">
+            {era.items.map((it, i) => (
+              <li key={it.date + it.event} className="relative">
+                {/* 타임라인 점 */}
+                <span className="absolute -left-[1.7rem] top-2 h-2.5 w-2.5 rounded-full bg-brand lg:-left-[3.35rem]" />
+                <Reveal delay={(i % 4) * 60}>
+                  <p className="text-2xl font-bold text-neutral-900 lg:text-3xl">{it.date}</p>
+                  <p className="mt-2 whitespace-pre-line text-lg font-medium leading-8 text-zinc-600 lg:text-xl">
                     {it.event}
                   </p>
-                </li>
-              ))}
-            </ul>
-          </div>
+                </Reveal>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
